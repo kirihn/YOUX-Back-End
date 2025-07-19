@@ -17,6 +17,7 @@ model User{
   id String @id @default(cuid())
   firstName String
   LastName String
+  height Int
   weight Float
   gender  String
   address String
