@@ -21,14 +21,17 @@ export class CreateUserDto {
   @ApiProperty({ example: 174 })
   @Type(() => Number)
   @IsNumber()
+  @IsNotEmpty()
   height: number;
 
   @ApiProperty({ example: 73 })
   @Type(() => Number)
   @IsNumber()
+  @IsNotEmpty()
   weight: number;
 
   @ApiProperty({ example: 'м' })
+  @IsNotEmpty()
   @IsEnum(Gender, { message: 'Гендер должен быть пустым м|ж' })
   gender: Gender;
 

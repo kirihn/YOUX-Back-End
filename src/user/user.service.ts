@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { DeleteUserDto } from './dto/deleteUser.dto';
@@ -14,7 +14,7 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async CreateNewUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
+  async CreateNewUser(createUser: CreateUserDto, file: Express.Multer.File) {
     const uploadDir = path.join(process.cwd(), 'uploads', 'userAvatars');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -23,17 +23,18 @@ export class UserService {
     const createdUser = await this.prisma.$transaction(async (prisma) => {
       const newUser = await prisma.user.create({
         data: {
-          firstName: createUserDto.firstName,
-          lastName: createUserDto.lastName,
-          height: createUserDto.height,
-          weight: createUserDto.weight,
-          gender: createUserDto.gender,
-          address: createUserDto.address,
+          firstName: createUser.firstName,
+          lastName: createUser.lastName,
+          height: createUser.height,
+          weight: createUser.weight,
+          gender: createUser.gender,
+          address: createUser.address,
           photo: 'uploads/defaults/errorUserAvatar.png',
         },
       });
 
-      const fileName = newUser.id + '-avatar-' + file.originalname;
+      const fileName =
+        newUser.id + '-avatar' + path.extname(file.originalname);
       const filePath = path.join(uploadDir, fileName);
 
       try {
@@ -57,11 +58,43 @@ export class UserService {
     return createdUser;
   }
 
-  async UpdateUser(UpdateUserDto: UpdateUserDto, file?: Express.Multer.File) {
-    return `This action returns a # user`;
+  async UpdateUser(updatedUser: UpdateUserDto, file?: Express.Multer.File) {
+    await this.UpdateUserValidation(updatedUser);
+
+    const { id, ...fieldsToUpdate } = updatedUser;
+
+    const user = await this.prisma.$transaction(async (prisma) => {
+      if (file) {
+        const uploadDir = path.join(process.cwd(), 'uploads', 'userAvatars');
+
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const fileName = id + '-avatar' + path.extname(file.originalname);
+        const filePath = path.join(uploadDir, fileName);
+
+        try {
+          await fs.promises.writeFile(filePath, file.buffer);
+        } catch (err) {
+          throw new Error('Ошибка обновления аватара: ' + err.message);
+        }
+
+        fieldsToUpdate.photo = `uploads/userAvatars/${fileName}`;
+      }
+
+      const user = await prisma.user.update({
+        where: { id: id },
+        data: fieldsToUpdate,
+      });
+
+      return user;
+    });
+
+    return user;
   }
 
-  async DeleteUser(deleteUserDto: DeleteUserDto) {
+  async DeleteUser(deleteUser: DeleteUserDto) {
     return `This action removes a # user`;
   }
 
@@ -69,15 +102,19 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  private async CreateNewUserValidation(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  private async UpdateUserValidation(UpdateUser: UpdateUserDto) {
+    try {
+      await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: UpdateUser.id,
+        },
+      });
+    } catch {
+      throw new BadRequestException('Пользователя с данным ID не существует');
+    }
   }
 
-  private async UpdateUserValidation(UpdateUserDto: UpdateUserDto) {
-    return `This action returns a # user`;
-  }
-
-  private async DeleteUserValidation(deleteUserDto: DeleteUserDto) {
+  private async DeleteUserValidation(deleteUser: DeleteUserDto) {
     return `This action removes a # user`;
   }
 }
