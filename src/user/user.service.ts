@@ -5,19 +5,35 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 
 @Injectable()
 export class UserService {
-  GetUsers(page: number, countUsers: number) {
+  async GetUsers(page: number, countUsers: number) {
     return `This action returns all user`;
   }
 
-  CreateNewUser(createUserDto: CreateUserDto) {
+  async CreateNewUser(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
 
-  UpdateUser(UpdateUserDto: UpdateUserDto) {
+  async UpdateUser(UpdateUserDto: UpdateUserDto) {
     return `This action returns a # user`;
   }
 
-  DeleteUser(deleteUserDto: DeleteUserDto) {
+  async DeleteUser(deleteUserDto: DeleteUserDto) {
+    return `This action removes a # user`;
+  }
+
+  private async GetUsersValidation(page: number, countUsers: number) {
+    return `This action returns all user`;
+  }
+
+  private async CreateNewUserValidation(createUserDto: CreateUserDto) {
+    return 'This action adds a new user';
+  }
+
+  private async UpdateUserValidation(UpdateUserDto: UpdateUserDto) {
+    return `This action returns a # user`;
+  }
+
+  private async DeleteUserValidation(deleteUserDto: DeleteUserDto) {
     return `This action removes a # user`;
   }
 }
