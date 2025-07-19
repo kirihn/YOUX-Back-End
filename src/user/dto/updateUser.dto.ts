@@ -43,4 +43,11 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   address?: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: false,
+  })
+  photo: any;
 }

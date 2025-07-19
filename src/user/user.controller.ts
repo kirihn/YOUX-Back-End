@@ -13,10 +13,9 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { DeleteUserDto } from './dto/deleteUser.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/pipes/fileValidationPipe';
-import multer from 'multer';
 
 @ApiTags('Контроллер для работы с пользователями')
 @Controller('user')
@@ -33,6 +32,8 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Создать пользователя' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateUserDto })
   @Post('CreateNewUser')
   @UseInterceptors(FileInterceptor('photo'))
   async CreateNewUser(
@@ -51,6 +52,8 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Изменить пользователя' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateUserDto })
   @Put('UpdateUser')
   @UseInterceptors(FileInterceptor('photo'))
   async UpdateUser(

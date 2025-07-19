@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export enum Gender {
@@ -18,10 +19,12 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({ example: 174 })
+  @Type(() => Number)
   @IsNumber()
   height: number;
 
   @ApiProperty({ example: 73 })
+  @Type(() => Number)
   @IsNumber()
   weight: number;
 
@@ -33,4 +36,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   address: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: true,
+  })
+  photo: any;
 }
