@@ -9,11 +9,11 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async CreateNewUser(createUserDto: CreateUserDto) {
+  async CreateNewUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
     return 'This action adds a new user';
   }
 
-  async UpdateUser(UpdateUserDto: UpdateUserDto) {
+  async UpdateUser(UpdateUserDto: UpdateUserDto, file?: Express.Multer.File) {
     return `This action returns a # user`;
   }
 
