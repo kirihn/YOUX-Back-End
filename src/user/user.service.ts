@@ -33,8 +33,7 @@ export class UserService {
         },
       });
 
-      const fileName =
-        newUser.id + '-avatar' + path.extname(file.originalname);
+      const fileName = newUser.id + '-avatar' + path.extname(file.originalname);
       const filePath = path.join(uploadDir, fileName);
 
       try {
@@ -95,18 +94,23 @@ export class UserService {
   }
 
   async DeleteUser(deleteUser: DeleteUserDto) {
-    return `This action removes a # user`;
+    await this.DeleteUserValidation(deleteUser);
+
+    const deletedUser = await this.prisma.user.delete({
+      where: { id: deleteUser.id },
+    });
+    return deletedUser;
   }
 
   private async GetUsersValidation(page: number, countUsers: number) {
     return `This action returns all user`;
   }
 
-  private async UpdateUserValidation(UpdateUser: UpdateUserDto) {
+  private async UpdateUserValidation(updateUser: UpdateUserDto) {
     try {
       await this.prisma.user.findUniqueOrThrow({
         where: {
-          id: UpdateUser.id,
+          id: updateUser.id,
         },
       });
     } catch {
@@ -115,6 +119,14 @@ export class UserService {
   }
 
   private async DeleteUserValidation(deleteUser: DeleteUserDto) {
-    return `This action removes a # user`;
+    try {
+      await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: deleteUser.id,
+        },
+      });
+    } catch {
+      throw new BadRequestException('Пользователя с данным ID не существует');
+    }
   }
 }
