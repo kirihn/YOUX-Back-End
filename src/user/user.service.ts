@@ -5,13 +5,22 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 import { PrismaClient } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
-import { promiseHooks } from 'v8';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaClient) {}
   async GetUsers(page: number, countUsers: number) {
-    return `This action returns all user`;
+    await this.GetUsersValidation(page, countUsers);
+
+    const skip = (page - 1) * countUsers;
+
+    const users = await this.prisma.user.findMany({
+      skip: skip,
+      take: countUsers,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return users;
   }
 
   async CreateNewUser(createUser: CreateUserDto, file: Express.Multer.File) {
@@ -103,7 +112,17 @@ export class UserService {
   }
 
   private async GetUsersValidation(page: number, countUsers: number) {
-    return `This action returns all user`;
+    if (!Number.isInteger(page) || page < 1) {
+      throw new BadRequestException(
+        'Номер страницы должен быть положительным целым числом (page >= 1)',
+      );
+    }
+
+    if (!Number.isInteger(countUsers) || countUsers < 1 || countUsers > 100) {
+      throw new BadRequestException(
+        'Количество пользователей на странице должно быть от 1 до 100',
+      );
+    }
   }
 
   private async UpdateUserValidation(updateUser: UpdateUserDto) {
