@@ -29,7 +29,7 @@ export class UserService {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const createdUser = await this.prisma.$transaction(async (prisma) => {
+    await this.prisma.$transaction(async (prisma) => {
       const newUser = await prisma.user.create({
         data: {
           firstName: createUser.firstName,
@@ -63,7 +63,9 @@ export class UserService {
       return updatedUser;
     });
 
-    return createdUser;
+    return {
+      status: true,
+    };
   }
 
   async UpdateUser(updatedUser: UpdateUserDto, file?: Express.Multer.File) {
@@ -71,7 +73,7 @@ export class UserService {
 
     const { id, ...fieldsToUpdate } = updatedUser;
 
-    const user = await this.prisma.$transaction(async (prisma) => {
+    await this.prisma.$transaction(async (prisma) => {
       if (file) {
         const uploadDir = path.join(process.cwd(), 'uploads', 'userAvatars');
 
@@ -99,16 +101,20 @@ export class UserService {
       return user;
     });
 
-    return user;
+    return {
+      status: true,
+    };
   }
 
   async DeleteUser(deleteUser: DeleteUserDto) {
     await this.DeleteUserValidation(deleteUser);
 
-    const deletedUser = await this.prisma.user.delete({
+    await this.prisma.user.delete({
       where: { id: deleteUser.id },
     });
-    return deletedUser;
+    return {
+      status: true,
+    };
   }
 
   private async GetUsersValidation(page: number, countUsers: number) {
