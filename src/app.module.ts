@@ -9,7 +9,11 @@ import { join } from 'path';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'react'),
-      exclude: ['/api*'],
+      exclude: ['/api*', '/uploads*'],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     UserModule,
   ],

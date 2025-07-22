@@ -16,7 +16,7 @@ async function bootstrap() {
     }),
   );
 
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  // app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   app.enableCors({
     origin: 'http://localhost:5173',
