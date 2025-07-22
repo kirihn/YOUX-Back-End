@@ -5,7 +5,6 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 import { PrismaClient } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
-import { UserById } from './dto/userById.dto';
 
 @Injectable()
 export class UserService {
@@ -14,6 +13,18 @@ export class UserService {
   async GetUserById(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: false,
+        firstName: true,
+        lastName: true,
+        height: true,
+        weight: true,
+        gender: true,
+        address: true,
+        photo: false,
+        createdAt: false,
+        updatedAt: false,
+      },
     });
 
     if (user) return user;
@@ -87,10 +98,14 @@ export class UserService {
     };
   }
 
-  async UpdateUser(updatedUser: UpdateUserDto, file?: Express.Multer.File) {
-    await this.UpdateUserValidation(updatedUser);
+  async UpdateUser(
+    userId: string,
+    updatedUser: UpdateUserDto,
+    file?: Express.Multer.File,
+  ) {
+    await this.UpdateUserValidation(userId);
 
-    const { id, ...fieldsToUpdate } = updatedUser;
+    const fieldsToUpdate = updatedUser;
 
     await this.prisma.$transaction(async (prisma) => {
       if (file) {
@@ -100,7 +115,7 @@ export class UserService {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
 
-        const fileName = id + '-avatar' + path.extname(file.originalname);
+        const fileName = userId + '-avatar' + path.extname(file.originalname);
         const filePath = path.join(uploadDir, fileName);
 
         try {
@@ -113,7 +128,7 @@ export class UserService {
       }
 
       const user = await prisma.user.update({
-        where: { id: id },
+        where: { id: userId },
         data: fieldsToUpdate,
       });
 
@@ -150,11 +165,11 @@ export class UserService {
     }
   }
 
-  private async UpdateUserValidation(updateUser: UpdateUserDto) {
+  private async UpdateUserValidation(userId: string) {
     try {
       await this.prisma.user.findUniqueOrThrow({
         where: {
-          id: updateUser.id,
+          id: userId,
         },
       });
     } catch {

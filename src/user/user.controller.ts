@@ -16,7 +16,6 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/pipes/fileValidationPipe';
-import { UserById } from './dto/userById.dto';
 
 @ApiTags('Контроллер для работы с пользователями')
 @Controller('user')
@@ -72,9 +71,10 @@ export class UserController {
       }),
     )
     file: Express.Multer.File,
+    @Query('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.UpdateUser(updateUserDto, file);
+    return this.userService.UpdateUser(userId, updateUserDto, file);
   }
 
   @ApiOperation({ summary: 'Удалить пользователя' })
