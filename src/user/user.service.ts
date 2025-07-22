@@ -5,22 +5,41 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 import { PrismaClient } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
+import { UserById } from './dto/userById.dto';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaClient) {}
+
+  async GetUserById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user) return user;
+
+    throw new BadRequestException('Пользователь с данным Id не найден');
+  }
+
   async GetUsers(page: number, countUsers: number) {
     await this.GetUsersValidation(page, countUsers);
 
     const skip = (page - 1) * countUsers;
 
-    const users = await this.prisma.user.findMany({
-      skip: skip,
-      take: countUsers,
-      orderBy: { createdAt: 'desc' },
-    });
+    const [users, totalUsers] = await Promise.all([
+      this.prisma.user.findMany({
+        skip: skip,
+        take: countUsers,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count(),
+    ]);
 
-    return users;
+    const totalPages = Math.ceil(totalUsers / countUsers);
+    return {
+      users,
+      totalPages,
+    };
   }
 
   async CreateNewUser(createUser: CreateUserDto, file: Express.Multer.File) {

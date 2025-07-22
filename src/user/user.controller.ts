@@ -16,6 +16,7 @@ import { DeleteUserDto } from './dto/deleteUser.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/pipes/fileValidationPipe';
+import { UserById } from './dto/userById.dto';
 
 @ApiTags('Контроллер для работы с пользователями')
 @Controller('user')
@@ -23,12 +24,18 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Получить список пользователей' })
+  @Get('GetUserById')
+  async GetUserById(@Query('userId') userId: string) {
+    return this.userService.GetUserById(userId);
+  }
+
+  @ApiOperation({ summary: 'Получить список пользователей' })
   @Get('GetUsers')
   async GetUsers(
-    @Query('page') page: number,
+    @Query('pageIndex') pageIndex: number,
     @Query('countUsers') countUsers: number,
   ) {
-    return this.userService.GetUsers(page, countUsers);
+    return this.userService.GetUsers(pageIndex, countUsers);
   }
 
   @ApiOperation({ summary: 'Создать пользователя' })
